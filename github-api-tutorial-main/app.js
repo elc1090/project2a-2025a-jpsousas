@@ -1,64 +1,105 @@
-// Get the GitHub username input form
 const gitHubForm = document.getElementById('gitHubForm');
+const dropdown = document.getElementById('repositoriesDropdown');
+const ul = document.getElementById('userRepos');
+let currentRepos = [];
+let currentUsername = ''; 
 
-// Listen for submissions on GitHub username input form
 gitHubForm.addEventListener('submit', (e) => {
-
-    // Prevent default form submission action
     e.preventDefault();
 
-    // Get the GitHub username input field on the DOM
-    let usernameInput = document.getElementById('usernameInput');
+    const usernameInput = document.getElementById('usernameInput');
+    const gitHubUsername = usernameInput.value.trim();
+    currentUsername = gitHubUsername;
 
-    // Get the value of the GitHub username input field
-    let gitHubUsername = usernameInput.value;
+    if (!gitHubUsername) return;
 
-    // Run GitHub API function, passing in the GitHub username
-    requestUserRepos(gitHubUsername)
-        .then(response => response.json()) // parse response into json
+    fetch(`https://api.github.com/users/${gitHubUsername}/repos?per_page=100`)
+        .then(response => response.json())
         .then(data => {
-            // update html with data from github
-            for (let i in data) {
-                // Get the ul with id of userRepos
+            ul.innerHTML = '';
+            dropdown.innerHTML = '<option value="">Select a repository</option>';
+            currentRepos = data;
 
-                if (data.message === "Not Found") {
-                    let ul = document.getElementById('userRepos');
-
-                    // Create variable that will create li's to be added to ul
-                    let li = document.createElement('li');
-
-                    // Add Bootstrap list item class to each li
-                    li.classList.add('list-group-item')
-                    // Create the html markup for each li
-                    li.innerHTML = (`
-                <p><strong>No account exists with username:</strong> ${gitHubUsername}</p>`);
-                    // Append each li to the ul
-                    ul.appendChild(li);
-                } else {
-
-                    let ul = document.getElementById('userRepos');
-
-                    // Create variable that will create li's to be added to ul
-                    let li = document.createElement('li');
-
-                    // Add Bootstrap list item class to each li
-                    li.classList.add('list-group-item')
-
-                    // Create the html markup for each li
-                    li.innerHTML = (`
-                <p><strong>Repo:</strong> ${data[i].name}</p>
-                <p><strong>Description:</strong> ${data[i].description}</p>
-                <p><strong>URL:</strong> <a href="${data[i].html_url}">${data[i].html_url}</a></p>
-            `);
-
-                    // Append each li to the ul
-                    ul.appendChild(li);
-                }
+            if (data.message === "Nao encontrado os dados") {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerHTML = `<p><strong>No account exists with username:</strong> ${gitHubUsername}</p>`;
+                ul.appendChild(li);
+                return;
             }
-        })
-})
 
-function requestUserRepos(username) {
-    // create a variable to hold the `Promise` returned from `fetch`
-    return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
-}
+            data.forEach(repo => {
+                // adiciona ao dropdown
+                const option = document.createElement('option');
+                option.value = repo.name;
+                option.textContent = repo.name;
+                dropdown.appendChild(option);
+
+                // adiciona a lista
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerHTML = `
+                    <p><strong>Repo:</strong> ${repo.name}</p>
+                    <p><strong>Description:</strong> ${repo.description || 'No description'}</p>
+                    <p><strong>URL:</strong> <a href="${repo.html_url}" target="_blank">${repo.html_url}</a></p>
+                `;
+                ul.appendChild(li);
+            });
+        });
+});
+
+dropdown.addEventListener('change', (e) => {
+    const selectedRepoName = e.target.value;
+    ul.innerHTML = '';
+
+    if (!selectedRepoName) {
+        // se nenhuma opção estiver selecionada, reexibe todos
+        currentRepos.forEach(repo => {
+            const li = document.createElement('li');
+            li.classList.add('list-group-item');
+            li.innerHTML = `
+                <p><strong>Repo:</strong> ${repo.name}</p>
+                <p><strong>Description:</strong> ${repo.description || 'No description'}</p>
+                <p><strong>URL:</strong> <a href="${repo.html_url}" target="_blank">${repo.html_url}</a></p>
+            `;
+            ul.appendChild(li);
+        });
+        return;
+    }
+
+    // encontra o repositório selecionado na lista
+    const selectedRepo = currentRepos.find(repo => repo.name === selectedRepoName);
+
+    // exibe os dados do repositório
+    const li = document.createElement('li');
+    li.classList.add('list-group-item');
+    li.innerHTML = `
+        <p><strong>Nome repositorio:</strong> ${selectedRepo.name}</p>
+        <p><strong>Descricao:</strong> ${selectedRepo.description || 'No description'}</p>
+        <p><strong>URL:</strong> <a href="${selectedRepo.html_url}" target="_blank">${selectedRepo.html_url}</a></p>
+        <div><strong>Commits:</strong>
+            <ul id="commitsList" class="mt-2"></ul>
+        </div>
+    `;
+    ul.appendChild(li);
+
+    // busca os commits do repositório
+    fetch(`https://api.github.com/repos/${currentUsername}/${selectedRepoName}/commits?per_page=100`)
+        .then(response => response.json())
+        .then(commits => {
+            const commitsList = document.getElementById('commitsList');
+
+            if (Array.isArray(commits)) {
+                console.log(commits)
+                commits.reverse().slice(0).forEach((commit, index) => {
+                    const commitItem = document.createElement('li');
+                    commitItem.textContent = `#${index+1} ${commit.commit.message} (${commit.commit.author.name})`;
+                    commitsList.appendChild(commitItem);
+                });
+            } else {
+                const commitItem = document.createElement('li');
+                commitItem.textContent = 'Os commits nao foram encontrados';
+                commitsList.appendChild(commitItem);
+            }
+        });
+});
