@@ -7,7 +7,10 @@
 > 5. Double-check: Certifique-se de que seu README.md não contenha instruções de entrega!
 > 6. Entregue este README.md dentro da pasta raiz do repositório de entrega. 
 
-![Screenshot do projeto](https://mdswanson.com/static/chops-ux-step-4.png "Screenshot do projeto").
+
+![Captura de tela 2025-04-15 011513](https://github.com/user-attachments/assets/db17c4e8-168f-4d0a-9307-3a31c58c2dc6)
+![Captura de tela 2025-04-15 011438](https://github.com/user-attachments/assets/2726e20b-8deb-4298-87bd-c2b21ac1da6d)
+![Captura de tela 2025-04-15 011532](https://github.com/user-attachments/assets/df92ad8d-4c85-4da6-953e-a2478e750b49)
 
 
 #### Deploy
@@ -17,20 +20,19 @@ Preencha aqui a URL para acesso ao site publicado
 
 #### Desenvolvedor(a)
 
-Preencha aqui seu nome
+João Pedro Sousa
 
 
 #### Ambiente de desenvolvimento
 
 Preencha aqui uma lista detalhada de ferramentas de desenvolvimento usadas, por exemplo:
 - VS Code
-- Outras
 
 #### Créditos
 
 Preencha aqui uma lista detalhada de recursos aproveitados no projeto, por exemplo:
-- URL de tutoriais/vídeos consultados
-- Créditos para colegas que colaboraram
+- ChatGPT
+- [Documentação sobre tags html](https://developer.mozilla.org/en-US/)
 
 
 #### Bastidores
